@@ -1,0 +1,67 @@
+# Chui Protocol CI：編譯 + 單元測試 + 驗證工具煙霧測試
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  # 與開發環境對齊的 sui CLI 版本；升級時同步更新 DECISIONS.md
+  SUI_VERSION: testnet-v1.78.1
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 快取 sui CLI
+        id: cache-sui
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/sui
+          key: sui-${{ env.SUI_VERSION }}-ubuntu-x86_64
+
+      - name: 安裝 sui CLI（快取未命中時）
+        if: steps.cache-sui.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.local/bin
+          curl -sSL --retry 3 \
+            "https://github.com/MystenLabs/sui/releases/download/${SUI_VERSION}/sui-${SUI_VERSION}-ubuntu-x86_64.tgz" \
+            -o /tmp/sui.tgz
+          tar -xzf /tmp/sui.tgz -C /tmp ./sui
+          mv /tmp/sui ~/.local/bin/sui
+
+      - name: 將 sui 加入 PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: 編譯 Move 套件
+        run: sui move build
+
+      - name: 執行 Move 單元測試
+        run: sui move test
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: verify.ts 煙霧測試（digest 決定性回歸）
+        run: |
+          cat > /tmp/order.json <<'EOF'
+          {"total": 4200000, "currency": "USDC", "items": [{"sku": "SKU-001", "qty": 2, "unit_price": 2100000}], "merchant": "coffee-place", "nonce": 7}
+          EOF
+          OUTPUT="$(node --experimental-strip-types scripts/verify.ts \
+            --order /tmp/order.json \
+            --salt 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff \
+            --digest-only true)"
+          echo "$OUTPUT"
+          # 黃金值：canonical 化規則若被改動，這裡會第一時間抓到
+          echo "$OUTPUT" | grep -q "0x41940bc6040aea99d0acef6d952e0496ec1d984ef7e841b79171fc28de537c25"
+
+      - name: deploy.sh 防呆測試（mainnet 未確認必須拒絕）
+        run: |
+          if ./scripts/deploy.sh --network mainnet; then
+            echo "deploy.sh 未擋下缺少 --yes-mainnet 的 mainnet 部署" >&2
+            exit 1
+          fi
