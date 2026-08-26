@@ -1,0 +1,11 @@
+[package]
+name = "chui"
+edition = "2024"
+license = "Apache-2.0"
+
+# Sui framework 依賴由 sui CLI 隱式提供（implicit dependencies，sui >= 1.45），
+# 不需要在此明確宣告。詳見：
+# https://docs.sui.io/guides/developer/packages/move-package-management
+
+[addresses]
+chui = "0x0"

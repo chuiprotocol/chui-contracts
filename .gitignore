@@ -1,0 +1,9 @@
+# Move 編譯輸出
+build/
+
+# Node
+node_modules/
+
+# 本機環境
+.env
+*.key
