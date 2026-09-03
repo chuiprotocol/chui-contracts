@@ -16,10 +16,10 @@ const THREE_USDC: u64 = 3_000_000;
 const ORDER_AMOUNT: u64 = 2_080_000;
 
 fun test_digest(): vector<u8> {
-    let mut digest = vector::empty<u8>();
-    let mut i = 0;
+    let mut digest = vector[];
+    let mut i: u8 = 0;
     while (i < 32) {
-        digest.push_back((i as u8));
+        digest.push_back(i);
         i = i + 1;
     };
     digest

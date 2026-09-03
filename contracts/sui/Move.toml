@@ -1,13 +1,12 @@
 # Chui Protocol Sui 合約套件
+#
+# 注意：不要明寫 Sui framework 相依——sui CLI（1.45+）會自動注入與
+# 自身版本相符的框架；明寫 git rev 會與本機 CLI 的 VM 版本錯配，
+# 造成單元測試 MISSING_DEPENDENCY / UNEXPECTED_VERIFIER_ERROR。
 [package]
 name = "chui"
 edition = "2024.beta"
 version = "0.1.0"
-
-# 新版 sui CLI（1.45+）會自動注入 Sui framework 相依；
-# 為了相容較舊版本仍明確宣告。
-[dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
 chui = "0x0"

@@ -77,7 +77,7 @@ public struct CapsRevoked has copy, drop { vault_id: ID, new_version: u64 }
 public struct Withdrawn has copy, drop { vault_id: ID, amount: u64 }
 
 /// 用戶唯一一次動手：存入資金、設單筆上限、把 AgentCap 交給 agent。
-public entry fun create_and_authorize<T>(
+public fun create_and_authorize<T>(
     deposit: Coin<T>,
     per_tx_limit: u64,
     agent: address,
@@ -112,7 +112,7 @@ public entry fun create_and_authorize<T>(
 }
 
 /// Agent 自動結算：規則全過才從 Vault 把錢直接轉給商家。
-public entry fun agent_settle<T>(
+public fun agent_settle<T>(
     vault: &mut Vault<T>,
     cap: &AgentCap,
     amount: u64,
@@ -134,33 +134,33 @@ public entry fun agent_settle<T>(
         merchant,
         owner: vault.owner,
         amount,
-        coin_type: type_name::get<T>().into_string(),
+        coin_type: type_name::with_defining_ids<T>().into_string(),
         order_digest,
     });
     transfer::public_transfer(payment, merchant);
 }
 
 /// 用戶加值（不需要重新授權，額度＝餘額）。
-public entry fun deposit<T>(vault: &mut Vault<T>, more: Coin<T>) {
+public fun deposit<T>(vault: &mut Vault<T>, more: Coin<T>) {
     vault.funds.join(more.into_balance());
 }
 
 /// 一鍵撤銷：所有已發出的 AgentCap 立即失效。只有 owner 能呼叫。
-public entry fun revoke_caps<T>(vault: &mut Vault<T>, ctx: &TxContext) {
+public fun revoke_caps<T>(vault: &mut Vault<T>, ctx: &TxContext) {
     assert!(ctx.sender() == vault.owner, ENotOwner);
     vault.cap_version = vault.cap_version + 1;
     event::emit(CapsRevoked { vault_id: object::id(vault), new_version: vault.cap_version });
 }
 
 /// 撤銷後重新授權：發新的 cap 給（新的）agent。只有 owner 能呼叫。
-public entry fun reauthorize<T>(vault: &Vault<T>, agent: address, ctx: &mut TxContext) {
+public fun reauthorize<T>(vault: &Vault<T>, agent: address, ctx: &mut TxContext) {
     assert!(ctx.sender() == vault.owner, ENotOwner);
     let cap = AgentCap { id: object::new(ctx), vault_id: object::id(vault), version: vault.cap_version };
     transfer::public_transfer(cap, agent);
 }
 
 /// 領回全部剩餘資金。只有 owner 能呼叫。
-public entry fun withdraw<T>(vault: &mut Vault<T>, ctx: &mut TxContext) {
+public fun withdraw<T>(vault: &mut Vault<T>, ctx: &mut TxContext) {
     assert!(ctx.sender() == vault.owner, ENotOwner);
     let amount = vault.funds.value();
     event::emit(Withdrawn { vault_id: object::id(vault), amount });

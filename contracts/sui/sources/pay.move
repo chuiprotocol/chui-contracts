@@ -40,7 +40,7 @@ public struct SettlementEvent has copy, drop {
 ///
 /// 呼叫端（錢包側）用 coinWithBalance 先切出「剛好等於訂單金額」的 coin，
 /// 因此 coin 面額即結算金額，合約不需再信任呼叫端另傳的金額參數。
-public entry fun settle<T>(
+public fun settle<T>(
     payment: Coin<T>,
     merchant: address,
     order_digest: vector<u8>,
@@ -55,7 +55,7 @@ public entry fun settle<T>(
         merchant,
         payer: ctx.sender(),
         amount,
-        coin_type: type_name::get<T>().into_string(),
+        coin_type: type_name::with_defining_ids<T>().into_string(),
         order_digest,
     });
     transfer::public_transfer(payment, merchant);
