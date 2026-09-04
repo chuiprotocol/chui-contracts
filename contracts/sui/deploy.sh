@@ -10,7 +10,7 @@ echo "== 檢查環境 =="
 sui --version
 ACTIVE_ENV=$(sui client active-env)
 if [ "$ACTIVE_ENV" != "testnet" ]; then
-  echo "目前 env 是 $ACTIVE_ENV，切換到 testnet…"
+  echo "目前 env 是 ${ACTIVE_ENV}，切換到 testnet…"
   sui client switch --env testnet 2>/dev/null || {
     sui client new-env --alias testnet --rpc https://fullnode.testnet.sui.io:443
     sui client switch --env testnet
@@ -22,15 +22,34 @@ echo "== 單元測試 =="
 sui move test
 
 echo "== 發佈到 Testnet =="
-PUBLISH_JSON=$(sui client publish --gas-budget 100000000 --json)
+# 不把輸出悶在 $() 裡：失敗時完整印出，並給出最常見原因的解法
+set +e
+PUBLISH_JSON=$(sui client publish --gas-budget 100000000 --json 2>&1)
+publish_status=$?
+set -e
+if [ "${publish_status}" -ne 0 ]; then
+  echo "${PUBLISH_JSON}"
+  echo ""
+  echo "❌ 發佈失敗（exit ${publish_status}）。最常見原因：sui CLI 太舊，"
+  echo "   跟 Testnet 的 protocol 版本不合（上方若出現 protocol version 警告即是）。"
+  echo "   解法：brew upgrade sui    （或 suiup install sui@testnet）"
+  echo "   升級後重跑 ./scripts/go-live.sh 即可。"
+  exit 1
+fi
+# CLI 可能在 JSON 前印警告行——從第一個 { 開始解析
 PACKAGE_ID=$(echo "$PUBLISH_JSON" | python3 -c "
 import json, sys
-data = json.load(sys.stdin)
+raw = sys.stdin.read()
+data = json.loads(raw[raw.find('{'):])
 for change in data.get('objectChanges', []):
     if change.get('type') == 'published':
         print(change['packageId']); break
 ")
-TX_DIGEST=$(echo "$PUBLISH_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['digest'])")
+TX_DIGEST=$(echo "$PUBLISH_JSON" | python3 -c "
+import json, sys
+raw = sys.stdin.read()
+print(json.loads(raw[raw.find('{'):])['digest'])
+")
 
 if [ -z "$PACKAGE_ID" ]; then
   echo "找不到 packageId，完整輸出："; echo "$PUBLISH_JSON"; exit 1
