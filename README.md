@@ -1,5 +1,9 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/chuiprotocol/chui-app/main/branding/chui-lockup.svg" alt="Chui Protocol" width="360" />
+</p>
+
 <h1 align="center">chui-contracts</h1>
-<h3 align="center">Chui Protocol（嘴付協議）鏈上層——全自寫 Sui Move 合約</h3>
+<h3 align="center">Chui Protocol（嘴付協議）智能合約</h3>
 
 <p align="center">
   <a href="https://github.com/chuiprotocol/chui-contracts/actions"><img src="https://img.shields.io/github/actions/workflow/status/chuiprotocol/chui-contracts/ci.yml?label=CI" alt="CI" /></a>
@@ -14,10 +18,18 @@
   <a href="#威脅模型誠實版">🛡 威脅模型</a>
 </p>
 
+<p align="center">
+  <a href="https://youtu.be/G8o4Wx5MeNM">
+    <img src="https://img.youtube.com/vi/G8o4Wx5MeNM/maxresdefault.jpg" alt="Chui Protocol 2 分鐘 Demo 影片" width="640" />
+  </a>
+  <br />
+  <em>▶ 點擊觀看 2 分鐘 Demo</em>
+</p>
+
 ---
 
-「語音點餐、鏈上自動扣款」的信任基礎全在這三個模組——**每一行都是本專案自寫**，
-不依賴任何第三方合約：
+「語音點餐、鏈上自動扣款」的信任基礎全在這三個模組——**現階段每一行自寫**，
+若找到更穩定的第三方合約會適當引用：
 
 | 模組 | 職責 | 一句話 |
 |---|---|---|
@@ -27,7 +39,7 @@
 
 ## 核心設計
 
-### `chui::vault`——授權金庫（x402 式預授權的自製實作）
+### `chui::vault`——授權金庫
 
 ```
 用戶唯一一次簽名 create_and_authorize：
