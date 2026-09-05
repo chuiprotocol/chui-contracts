@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none"
+     role="img" aria-labelledby="chui-mark-title">
+  <title id="chui-mark-title">Chui Protocol 嘴付協議</title>
+  <!-- Chui Protocol mark ── 單色深藍（chui-ink #101A2E，見 chui-tokens.css）。
+       一個字符講完整個協議：對話框＝開口，框裡的 ¥＝就付了，右側聲波＝語音。
+       手繪語彙（anthropic-art）：圓不正、線條粗細不均、圓頭端點、刻意不對稱。
+       mark 家族（mark / mark-inverse / app-icon / lockup）共用這組座標。 -->
+  <g transform="translate(-3 1.5)"
+     stroke="#101A2E" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- 對話框（不規則圓）＋左下尾巴 -->
+    <path stroke-width="8"
+      d="M33 77 L24 99 L46 84 Q60 89 71 81 Q86 71 86 54 Q86 35 70 26 Q54 18 39 25 Q22 33 21 51 Q20 66 30 74 Z"/>
+    <!-- 幣值記號 ¥：一豎兩橫，明確讀成「錢」而不是加號 -->
+    <path stroke-width="7"   d="M55 32 L54.6 68"/>
+    <path stroke-width="6.5" d="M44 43.5 L67 42.7"/>
+    <path stroke-width="6.5" d="M44.2 54 L67.2 53.2"/>
+    <!-- 聲波：兩道往右擴散的弧（說出口） -->
+    <path stroke-width="6.5" d="M93 38 Q100 52 93 66"/>
+    <path stroke-width="6"   d="M103 31 Q112 52 103 73"/>
+  </g>
+</svg>

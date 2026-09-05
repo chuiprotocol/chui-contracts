@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/chuiprotocol/chui-app/main/branding/chui-lockup.svg" alt="Chui Protocol" width="360" />
+  <img src="branding/chui-mark.svg" alt="Chui Protocol 嘴付協議" width="160" />
 </p>
 
 <h1 align="center">chui-contracts</h1>
