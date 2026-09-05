@@ -8,7 +8,18 @@
 /// 3. 一鍵撤銷：owner 把 cap_version +1，所有已發出的 cap 立即全部失效。
 /// 4. 隱私：鏈上只留 32 bytes salted digest。
 ///
-/// 這就是 x402「預授權額度內 agent 零簽名代付」模式在 Sui 上的自製實作。
+/// 威脅模型（誠實版）：
+/// - agent key 被偷的最壞情況：攻擊者可在單筆上限內「分多筆」把餘額
+///   轉往任意地址——per_tx_limit 限制的是單筆、不是總額，**總損失上限
+///   ＝Vault 餘額本身**。這是刻意的設計取捨：授權金額就是你願意承擔的
+///   風險上限（demo 建議小額），而 owner 隨時可 revoke_caps 止血、
+///   withdraw 領回。要更強的防護（商家白名單、epoch 累計限額）列於
+///   roadmap，屬功能擴充而非漏洞修補。
+/// - deposit 刻意不設權限：任何人「幫別人的 Vault 加值」只會增加該
+///   owner 可領回的餘額，無利可圖、無害。
+/// - owner 專屬操作（withdraw／revoke／reauthorize）全部驗 ctx.sender()；
+///   agent_settle 驗 cap 綁定＋版本＋單筆上限＋餘額＋digest 長度，
+///   五關全過才放行，缺一即 abort。
 module chui::vault;
 
 use sui::balance::Balance;

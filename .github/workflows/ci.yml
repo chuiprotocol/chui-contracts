@@ -1,0 +1,27 @@
+# CI：每次 push／PR 跑全部 Move 單元測試（17 案例）。
+# sui CLI 直接抓官方 testnet release binary——與 deploy.sh 的目標網路一致。
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  move-test:
+    name: sui move test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安裝 sui CLI（官方 testnet release）
+        run: |
+          TAG=$(gh release list --repo MystenLabs/sui --limit 30 --json tagName \
+            --jq '[.[].tagName | select(startswith("testnet-"))][0]')
+          echo "使用 $TAG"
+          gh release download "$TAG" --repo MystenLabs/sui \
+            --pattern "sui-${TAG}-ubuntu-x86_64.tgz" --output sui.tgz
+          mkdir -p "$HOME/sui-bin" && tar -xzf sui.tgz -C "$HOME/sui-bin"
+          echo "$HOME/sui-bin" >> "$GITHUB_PATH"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: 跑 Move 測試
+        run: cd contracts/sui && sui move test
